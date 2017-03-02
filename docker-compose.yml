@@ -1,6 +1,6 @@
 postgresql:
   restart: always
-  image: sameersbn/postgresql:9.4-18
+  image: sameersbn/postgresql:9.5-1
   environment:
     - DB_USER=gitlab
     - DB_PASS=password
@@ -10,29 +10,35 @@ postgresql:
     - /srv/docker/gitlab/postgresql:/var/lib/postgresql
 gitlab:
   restart: always
-  image: sameersbn/gitlab:8.6.5
+  image: sameersbn/gitlab:latest
   links:
     - redis:redisio
     - postgresql:postgresql
   ports:
-    - "10080:80"
-    - "10022:22"
+    - "4444:443"
+    - "22:22"
   environment:
-    - DEBUG=false
-    - TZ=Asia/Kolkata
-    - GITLAB_TIMEZONE=Kolkata
+    - DEBUG=true
+    - TZ=UTC
+    - GITLAB_TIMEZONE=UTC
 
-    - GITLAB_SECRETS_DB_KEY_BASE=long-and-random-alphanumeric-string
+    - GITLAB_SECRETS_DB_KEY_BASE=ae0f635b6b833bd11b931320b7be86b9efea04c213d0179a033a1a9416be5148f77e56f6e498cdd6221c237f99aeab8a782623e6a56d7288c9fd93f41e7c7e3b
+    - GITLAB_SECRETS_SECRET_KEY_BASE=ae0f635b6b833bd11b931320b7be86b9efea04c213d0179a033a1a9416be5148f77e56f6e498cdd6221c237f99aeab8a782623e6a56d7288c9fd93f41e7c7e3b
+    - GITLAB_SECRETS_OTP_KEY_BASE=d46f4f537d684c8d6fef24e4b2a0acc6a272a99f5fb0a531230ebe9df4c37ca82d6a72fd0d40e77f77b9654daffc639ec92c0b643c94bec709546c7e49ca9ffa
 
-    - GITLAB_HOST=localhost
-    - GITLAB_PORT=10080
+    - GITLAB_HOST=gitlab.bau5net.com
+    - GITLAB_HTTPS=true
+    - GITLAB_PORT=443
     - GITLAB_SSH_PORT=10022
     - GITLAB_RELATIVE_URL_ROOT=
+
+    - NGINX_HSTS_ENABLED=true
+    - NGINX_HSTS_MAXAGE=31536000
 
     - GITLAB_NOTIFY_ON_BROKEN_BUILDS=true
     - GITLAB_NOTIFY_PUSHER=false
 
-    - GITLAB_EMAIL=notifications@example.com
+    - GITLAB_EMAIL=rossi@guiliani.me
     - GITLAB_EMAIL_REPLY_TO=noreply@example.com
     - GITLAB_INCOMING_EMAIL_ADDRESS=reply@example.com
 
@@ -57,6 +63,8 @@ gitlab:
     - IMAP_STARTTLS=false
   volumes:
     - /srv/docker/gitlab/gitlab:/home/git/data
+    - /srv/docker/gitlab/gitlab/logs:/var/log/gitlab
+      #    - /srv/docker/gitlab/etc:/home/git/gitlab/lib
 redis:
   restart: always
   image: sameersbn/redis:latest
